@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{DECK_TITLE}}</title>
+  <style>
+    @font-face { font-family: MiSans; src: url('assets/fonts/MiSans-Regular.otf'); font-weight:400; }
+    @font-face { font-family: MiSans; src: url('assets/fonts/MiSans-Medium.otf'); font-weight:500; }
+    @font-face { font-family: MiSans; src: url('assets/fonts/MiSans-Semibold.otf'); font-weight:600; }
+    @font-face { font-family: Switzer; src: url('assets/fonts/Switzer-Regular.otf'); font-weight:400; }
+    @font-face { font-family: Switzer; src: url('assets/fonts/Switzer-Medium.otf'); font-weight:500; }
+    @font-face { font-family: Switzer; src: url('assets/fonts/Switzer-Semibold.otf'); font-weight:600; }
+    :root { --black:#000000; --white:#ffffff; --silver:#8c8c8c; --margin:72px; --gutter:18px; --ease:cubic-bezier(.16,1,.3,1); }
+    * { box-sizing:border-box; }
+    html,body { width:100%; height:100%; margin:0; overflow:hidden; background:var(--black); color:var(--black); font-family:MiSans,sans-serif; }
+    .viewport { position:relative; width:100%; height:100%; overflow:hidden; }
+    .deck-stage { position:absolute; left:50%; top:50%; width:1920px; height:1080px; overflow:hidden; background:var(--white); transform-origin:center; }
+    .slide { position:absolute; inset:0; padding:var(--margin); opacity:0; visibility:hidden; pointer-events:none; transform:translateY(28px); transition:opacity .55s var(--ease),transform .7s var(--ease),visibility 0s linear .7s; }
+    .slide.active { opacity:1; visibility:visible; pointer-events:auto; transform:none; transition-delay:0s; }
+    .slide.visible .reveal { opacity:1; transform:none; }
+    .slide.dark { color:var(--white); background:var(--black); }
+    .frame { position:absolute; inset:32px; border:1px solid rgba(0,0,0,.12); pointer-events:none; }
+    .dark .frame { border-color:rgba(255,255,255,.16); }
+    .logo { position:absolute; left:var(--margin); top:60px; width:108px; height:44px; object-fit:contain; object-position:left center; }
+    .page-head { position:absolute; left:234px; right:var(--margin); top:72px; display:grid; grid-template-columns:1fr auto; align-items:center; gap:24px; color:var(--silver); font:500 15px/1 Switzer,sans-serif; text-transform:uppercase; }
+    .page-head::before { content:""; height:1px; background:currentColor; opacity:.65; }
+    .page-foot { position:absolute; left:var(--margin); right:var(--margin); bottom:52px; display:flex; justify-content:space-between; color:var(--silver); font:500 14px/1 Switzer,sans-serif; }
+    .content { height:100%; padding-top:166px; }
+    .grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:var(--gutter); }
+    .eyebrow { color:var(--silver); font:500 17px/1 Switzer,sans-serif; text-transform:uppercase; }
+    .title { margin:28px 0 0; font:600 82px/1.08 MiSans,sans-serif; letter-spacing:0; }
+    .copy { margin:0; color:var(--silver); font:400 25px/1.62 MiSans,sans-serif; }
+    .reveal { opacity:0; transform:translateY(22px); transition:opacity .65s var(--ease),transform .65s var(--ease); }
+    .visible .reveal:nth-child(2) { transition-delay:.08s; }
+    .visible .reveal:nth-child(3) { transition-delay:.16s; }
+    .visible .reveal:nth-child(4) { transition-delay:.24s; }
+    .controls,.hint { position:fixed; z-index:5; color:var(--silver); font:500 13px/1 Switzer,sans-serif; opacity:0; pointer-events:none; transition:opacity .2s var(--ease); }
+    .controls { right:28px; bottom:22px; }
+    .hint { left:28px; bottom:22px; }
+    .editor-bar { position:fixed; right:28px; top:22px; z-index:10; display:flex; gap:10px; opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .2s var(--ease),transform .2s var(--ease); }
+    .show-ui .controls,.show-ui .hint,.show-ui .editor-bar,.editor-bar:focus-within,.editor-bar:hover { opacity:1; pointer-events:auto; transform:none; }
+    .editor-bar button { border:1px solid var(--silver); background:var(--black); color:var(--white); padding:9px 12px; font:500 13px/1 Switzer,sans-serif; cursor:pointer; }
+    .editor-bar button[aria-pressed="true"] { background:var(--white); color:var(--black); }
+    .editing [data-edit-id] { outline:1px dashed var(--silver); outline-offset:6px; cursor:text; }
+    .editing [data-edit-id]:focus { outline:2px solid currentColor; }
+    .mode-overlay { position:fixed; inset:0; z-index:20; display:none; background:var(--black); color:var(--white); font-family:MiSans,sans-serif; }
+    .mode-overlay.active { display:block; }
+    .overview-grid { height:100%; padding:48px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; overflow:auto; }
+    .thumb { position:relative; aspect-ratio:16/9; border:1px solid rgba(255,255,255,.28); background:var(--white); color:var(--black); overflow:hidden; cursor:pointer; }
+    .thumb.dark { background:var(--black); color:var(--white); }
+    .thumb b { position:absolute; left:20px; top:18px; color:var(--silver); font:500 13px/1 Switzer,sans-serif; }
+    .thumb span { position:absolute; left:20px; right:20px; bottom:18px; font:600 22px/1.12 MiSans,sans-serif; }
+    @media print { html,body { width:1920px; height:auto; overflow:visible; background:var(--white); } .viewport { height:auto; overflow:visible; } .deck-stage { position:static; width:auto; height:auto; transform:none!important; } .slide { position:relative; display:block!important; visibility:visible!important; opacity:1!important; pointer-events:auto!important; transform:none!important; transition:none!important; width:1920px; height:1080px; break-after:page; page-break-after:always; } .slide:last-child { break-after:auto; page-break-after:auto; } .controls,.hint,.editor-bar,.mode-overlay { display:none!important; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms!important; animation-duration:.01ms!important; } .reveal { opacity:1; transform:none; } }
+  </style>
+</head>
+<body>
+  <div class="viewport">
+    <main class="deck-stage" id="stage" aria-live="polite">
+      {{SLIDES}}
+    </main>
+  </div>
+  <div class="hint">← → / swipe / wheel / E edit / O overview / P print / Ctrl+S export</div>
+  <div class="controls" id="counter">01 / 01</div>
+  <div class="editor-bar" aria-label="演示控制">
+    <button id="editToggle" type="button" aria-pressed="false">编辑文本</button>
+    <button id="overviewToggle" type="button" aria-pressed="false">总览</button>
+    <button id="exportDeck" type="button">导出 HTML</button>
+    <button id="printDeck" type="button">打印 / PDF</button>
+    <button id="resetEdits" type="button">重置编辑</button>
+  </div>
+  <div class="mode-overlay" id="overviewOverlay" aria-label="页面总览" role="dialog" aria-modal="true">
+    <div class="overview-grid" id="overviewGrid"></div>
+  </div>
+  <script>
+    const slides=[...document.querySelectorAll('.slide')], stage=document.querySelector('#stage'), counter=document.querySelector('#counter'), editToggle=document.querySelector('#editToggle'), overviewToggle=document.querySelector('#overviewToggle'), exportDeck=document.querySelector('#exportDeck'), printDeck=document.querySelector('#printDeck'), resetEdits=document.querySelector('#resetEdits'), overviewOverlay=document.querySelector('#overviewOverlay'), overviewGrid=document.querySelector('#overviewGrid');
+    const storageKey='{{STORAGE_KEY}}';
+    let index=0,startX=0,editing=false,uiTimer=0,overviewOpen=false;
+    const editableSelector='.slide h1,.slide h2,.slide h3,.slide p,.slide li,.slide td,.slide th,.slide .metric-label,.slide .metric-value,.slide .caption,.slide .source,.slide .page-foot span:first-child';
+    const editables=[...document.querySelectorAll(editableSelector)];
+    editables.forEach((el,n)=>{el.dataset.editId=el.dataset.editId||`field-${n}`;el.setAttribute('contenteditable','false');});
+    function scale(){const factor=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform=`translate(-50%,-50%) scale(${factor})`;}
+    function revealUI(){document.body.classList.add('show-ui');clearTimeout(uiTimer);if(!editing)uiTimer=setTimeout(()=>document.body.classList.remove('show-ui'),1800);}
+    function saveEdits(){const data={};editables.forEach(el=>data[el.dataset.editId]=el.innerHTML);localStorage.setItem(storageKey,JSON.stringify(data));}
+    function restoreEdits(){try{const data=JSON.parse(localStorage.getItem(storageKey)||'{}');editables.forEach(el=>{if(data[el.dataset.editId]!==undefined)el.innerHTML=data[el.dataset.editId];});}catch{}}
+    function setEditing(on){editing=on;document.body.classList.toggle('editing',on);editToggle.setAttribute('aria-pressed',String(on));editToggle.textContent=on?'完成编辑':'编辑文本';editables.forEach(el=>el.setAttribute('contenteditable',String(on)));if(on){setOverview(false);document.body.classList.add('show-ui');clearTimeout(uiTimer);const first=editables.find(el=>el.closest('.slide')?.classList.contains('active'));if(first)first.focus();}else{saveEdits();revealUI();}}
+    function slideTitle(slide){return (slide.querySelector('h1')?.innerText||slide.getAttribute('aria-label')||'Untitled').trim();}
+    function buildOverview(){overviewGrid.innerHTML='';slides.forEach((slide,i)=>{const thumb=document.createElement('button');thumb.type='button';thumb.className=`thumb ${slide.classList.contains('dark')?'dark':''}`;thumb.innerHTML=`<b>${String(i+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}</b><span></span>`;thumb.querySelector('span').textContent=slideTitle(slide);thumb.addEventListener('click',()=>{show(i);setOverview(false);});overviewGrid.appendChild(thumb);});}
+    function setOverview(on){overviewOpen=on;overviewOverlay.classList.toggle('active',on);overviewToggle.setAttribute('aria-pressed',String(on));if(on){buildOverview();overviewGrid.querySelector('.thumb')?.focus();}}
+    function downloadHtml(){saveEdits();const clone=document.documentElement.cloneNode(true);clone.querySelectorAll('[contenteditable]').forEach(el=>el.setAttribute('contenteditable','false'));const blob=new Blob(['<!doctype html>\n'+clone.outerHTML],{type:'text/html;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='{{EXPORT_FILENAME}}';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+    function show(next){index=(next+slides.length)%slides.length;slides.forEach((slide,i)=>{const current=i===index;slide.classList.toggle('active',current);slide.classList.toggle('visible',current||slide.dataset.visited==='true');if(current)slide.dataset.visited='true';slide.querySelector('.page-foot span:last-child').textContent=`${String(i+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;});counter.textContent=`${String(index+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;history.replaceState(null,'',`#${index+1}`);}
+    function move(delta){show(index+delta);}
+    addEventListener('resize',scale);addEventListener('pointermove',revealUI);
+    addEventListener('keydown',e=>{revealUI();if(editing&&document.activeElement?.isContentEditable){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveEdits();}if(e.key==='Escape')setEditing(false);return;}if(e.key==='Escape')setOverview(false);if(e.key.toLowerCase()==='e')setEditing(!editing);if(e.key.toLowerCase()==='o')setOverview(!overviewOpen);if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();downloadHtml();}if(e.key.toLowerCase()==='p')window.print();if(['ArrowRight','PageDown',' '].includes(e.key))move(1);if(['ArrowLeft','PageUp'].includes(e.key))move(-1);});
+    stage.addEventListener('click',e=>{if(editing||e.target.isContentEditable)return;move(e.clientX<innerWidth/2?-1:1);});
+    stage.addEventListener('wheel',e=>{e.preventDefault();if(Math.abs(e.deltaY)>20)move(e.deltaY>0?1:-1);},{passive:false});
+    stage.addEventListener('touchstart',e=>startX=e.touches[0].clientX);
+    stage.addEventListener('touchend',e=>{if(editing)return;const delta=e.changedTouches[0].clientX-startX;if(Math.abs(delta)>40)move(delta<0?1:-1);});
+    editToggle.addEventListener('click',()=>setEditing(!editing));overviewToggle.addEventListener('click',()=>setOverview(!overviewOpen));exportDeck.addEventListener('click',downloadHtml);printDeck.addEventListener('click',()=>window.print());resetEdits.addEventListener('click',()=>{if(confirm('重置当前浏览器保存的演示页文字编辑？')){localStorage.removeItem(storageKey);location.reload();}});
+    document.addEventListener('input',e=>{if(editing&&e.target.dataset?.editId)saveEdits();});
+    addEventListener('hashchange',()=>{const requested=Number(location.hash.slice(1)||1)-1;if(requested!==index)show(requested);});
+    restoreEdits();scale();show(Number(location.hash.slice(1)||1)-1);
+  </script>
+</body>
+</html>

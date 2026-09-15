@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GUANYU / VI-aligned HTML templates</title>
+  <style>
+    @font-face { font-family: MiSans; src: url('assets/fonts/MiSans-Regular.otf'); font-weight: 400; }
+    @font-face { font-family: MiSans; src: url('assets/fonts/MiSans-Medium.otf'); font-weight: 500; }
+    @font-face { font-family: MiSans; src: url('assets/fonts/MiSans-Semibold.otf'); font-weight: 600; }
+    @font-face { font-family: Switzer; src: url('assets/fonts/Switzer-Regular.otf'); font-weight: 400; }
+    @font-face { font-family: Switzer; src: url('assets/fonts/Switzer-Medium.otf'); font-weight: 500; }
+    @font-face { font-family: Switzer; src: url('assets/fonts/Switzer-Semibold.otf'); font-weight: 600; }
+
+    :root { --black:#000000; --white:#ffffff; --silver:#8c8c8c; --margin:72px; --gutter:18px; --ease:cubic-bezier(.16,1,.3,1); }
+    * { box-sizing:border-box; }
+    html, body { width:100%; height:100%; margin:0; overflow:hidden; background:var(--black); color:var(--black); font-family:MiSans, sans-serif; }
+    .viewport { position:relative; width:100%; height:100%; overflow:hidden; }
+    .deck-stage { position:absolute; left:50%; top:50%; width:1920px; height:1080px; overflow:hidden; background:var(--white); transform-origin:center; }
+    .slide { position:absolute; inset:0; padding:var(--margin); opacity:0; visibility:hidden; pointer-events:none; transform:translateY(28px); transition:opacity .55s var(--ease), transform .7s var(--ease), visibility 0s linear .7s; }
+    .slide.active { opacity:1; visibility:visible; pointer-events:auto; transform:none; transition-delay:0s; }
+    .slide.dark { color:var(--white); background:var(--black); }
+    .frame { position:absolute; inset:32px; border:1px solid rgba(0,0,0,.12); pointer-events:none; }
+    .dark .frame { border-color:rgba(255,255,255,.16); }
+    .grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:var(--gutter); }
+    .logo { position:absolute; left:var(--margin); top:60px; width:108px; height:44px; object-fit:contain; object-position:left center; }
+    .page-head { position:absolute; left:234px; right:var(--margin); top:72px; display:grid; grid-template-columns:1fr auto; align-items:center; gap:24px; color:var(--silver); font:500 15px/1 Switzer, sans-serif; letter-spacing:.1em; }
+    .page-head::before { content:""; height:1px; background:currentColor; opacity:.65; }
+    .page-foot { position:absolute; left:var(--margin); right:var(--margin); bottom:52px; display:flex; justify-content:space-between; color:var(--silver); font:500 14px/1 Switzer, sans-serif; letter-spacing:.08em; }
+    .content { height:100%; padding-top:166px; }
+    .eyebrow { color:var(--silver); font:500 17px/1 Switzer, sans-serif; letter-spacing:.12em; text-transform:uppercase; }
+    .title { margin:28px 0 0; font:600 92px/1.08 MiSans, sans-serif; letter-spacing:-.045em; }
+    .copy { margin:0; color:var(--silver); font:400 25px/1.62 MiSans, sans-serif; }
+    .dark .copy { color:var(--silver); }
+    .rule { width:150px; height:2px; margin:44px 0; background:currentColor; }
+    .reveal { opacity:0; transform:translateY(22px); transition:opacity .65s var(--ease),transform .65s var(--ease); }
+    .visible .reveal { opacity:1; transform:none; }
+    .visible .reveal:nth-child(2) { transition-delay:.1s; }
+    .visible .reveal:nth-child(3) { transition-delay:.2s; }
+    .visible .reveal:nth-child(4) { transition-delay:.3s; }
+
+    .cover-content { height:100%; display:flex; flex-direction:column; justify-content:center; }
+    .cover-title { max-width:1030px; margin:34px 0 0; font:600 124px/1.04 MiSans, sans-serif; letter-spacing:-.055em; }
+    .cover-meta { margin-top:48px; color:var(--silver); font:500 18px/1.3 Switzer, sans-serif; letter-spacing:.08em; }
+    .cover-orbit { position:absolute; right:166px; top:248px; width:460px; height:460px; border:1px solid var(--silver); border-radius:50%; opacity:.9; }
+    .cover-orbit::before,.cover-orbit::after { content:""; position:absolute; background:var(--silver); }
+    .cover-orbit::before { left:50%; top:-110px; width:1px; height:680px; }
+    .cover-orbit::after { left:-110px; top:50%; width:680px; height:1px; }
+
+    .section-content { height:100%; padding:235px 0 110px; display:flex; flex-direction:column; justify-content:flex-end; }
+    .section-number { color:var(--white); font:600 246px/.78 Switzer, sans-serif; letter-spacing:-.1em; }
+    .section-title { max-width:950px; margin:45px 0 0; font:600 104px/1.05 MiSans, sans-serif; letter-spacing:-.05em; }
+
+    .narrative-title { grid-column:span 8; }
+    .narrative-copy { grid-column:2 / span 7; margin-top:68px; }
+    .columns { margin-top:76px; }
+    .column { grid-column:span 4; min-height:278px; padding-top:21px; border-top:2px solid currentColor; }
+    .column-no,.step-no { color:var(--silver); font:500 18px/1 Switzer, sans-serif; }
+    .column h2,.step h2 { margin:28px 0 15px; font:600 34px/1.2 MiSans, sans-serif; }
+    .column p,.step p { margin:0; color:var(--silver); font:400 21px/1.55 MiSans, sans-serif; }
+
+    .steps { margin-top:78px; }
+    .step { grid-column:span 3; min-height:260px; padding:22px 18px 0 0; border-top:2px solid currentColor; position:relative; }
+    .step:not(:last-child)::after { content:""; position:absolute; top:-7px; right:23px; width:12px; height:12px; border-top:2px solid currentColor; border-right:2px solid currentColor; transform:rotate(45deg); }
+
+    .metrics { margin-top:84px; }
+    .metric { grid-column:span 4; min-height:300px; padding-top:21px; border-top:2px solid currentColor; }
+    .metric-value { font:600 126px/.88 Switzer, sans-serif; letter-spacing:-.08em; }
+    .metric-label { margin-top:30px; color:var(--silver); font:400 21px/1.55 MiSans, sans-serif; }
+    .metric-source { margin-top:18px; color:var(--silver); font:400 14px/1.5 MiSans, sans-serif; }
+    .story-claim { grid-column:span 5; margin-top:78px; }
+    .story-claim h2 { margin:0; font:600 52px/1.2 MiSans, sans-serif; letter-spacing:-.04em; }
+    .story-claim p { margin:30px 0 0; color:var(--silver); font:400 22px/1.6 MiSans, sans-serif; }
+    .image-panel { grid-column:7 / span 6; min-height:480px; margin-top:42px; border:1px solid currentColor; display:flex; align-items:flex-end; padding:28px; position:relative; }
+    .image-panel::before { content:""; position:absolute; inset:0; background:linear-gradient(135deg,transparent 49.9%,rgba(140,140,140,.65) 50%,transparent 50.1%); opacity:.35; }
+    .image-panel strong,.image-panel span { position:relative; z-index:1; display:block; }
+    .image-panel strong { font:500 20px/1.2 MiSans, sans-serif; }
+    .image-panel span { margin-top:12px; color:var(--silver); font:400 15px/1.4 MiSans, sans-serif; }
+    .architecture { position:relative; height:510px; margin-top:44px; }
+    .architecture svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+    .connector { stroke:currentColor; stroke-width:1; stroke-dasharray:520; stroke-dashoffset:520; transition:stroke-dashoffset .75s var(--ease); }
+    .visible .connector { stroke-dashoffset:0; }
+    .node { position:absolute; min-width:156px; padding:18px 22px; border:1px solid currentColor; background:var(--black); text-align:center; font:500 22px/1.25 MiSans, sans-serif; }
+    .node.center { left:calc(50% - 105px); top:190px; min-width:210px; border-width:2px; font-size:30px; }
+    .node.n1 { left:8%; top:22px; }.node.n2 { right:8%; top:22px; }.node.n3 { left:8%; bottom:24px; }.node.n4 { right:8%; bottom:24px; }
+    .comparison { margin-top:68px; border-top:2px solid currentColor; }
+    .comparison-row { display:grid; grid-template-columns:4fr 2fr 2fr 2fr; min-height:76px; align-items:center; border-bottom:1px solid rgba(0,0,0,.28); font:400 21px/1.35 MiSans, sans-serif; }
+    .comparison-row > * { padding:0 16px; }.comparison-row .latin { font-family:Switzer, sans-serif; }.comparison-row.head { min-height:62px; color:var(--silver); font:500 16px/1 Switzer, sans-serif; letter-spacing:.07em; }
+    .timeline { position:relative; margin-top:112px; padding-top:36px; }
+    .timeline-line { position:absolute; left:0; right:0; top:0; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform .8s var(--ease); }
+    .visible .timeline-line { transform:scaleX(1); }
+    .milestone { grid-column:span 3; position:relative; min-height:210px; padding-top:28px; }
+    .milestone::before { content:""; position:absolute; left:0; top:-42px; width:14px; height:14px; border:2px solid currentColor; border-radius:50%; background:var(--white); }
+    .milestone .date { color:var(--silver); font:500 18px/1 Switzer, sans-serif; }.milestone h2 { margin:26px 0 15px; font:600 31px/1.2 MiSans, sans-serif; }.milestone p { margin:0; color:var(--silver); font:400 20px/1.55 MiSans, sans-serif; }
+    .dark .comparison-row { border-color:rgba(255,255,255,.3); }.dark .node { background:var(--black); }.dark .milestone::before { background:var(--black); }
+
+    .controls { position:fixed; right:28px; bottom:22px; z-index:5; color:var(--silver); font:500 14px/1 Switzer, sans-serif; letter-spacing:.08em; opacity:0; pointer-events:none; transition:opacity .2s var(--ease); }
+    .hint { position:fixed; left:28px; bottom:22px; z-index:5; color:var(--silver); font:400 13px/1 Switzer, sans-serif; opacity:0; pointer-events:none; transition:opacity .2s var(--ease); }
+    .editor-bar { position:fixed; right:28px; top:22px; z-index:10; display:flex; gap:10px; opacity:0; pointer-events:none; transform:translateY(-6px); transition:opacity .2s var(--ease),transform .2s var(--ease); }
+    .show-ui .controls,.show-ui .hint,.show-ui .editor-bar,.editor-bar:focus-within,.editor-bar:hover { opacity:1; pointer-events:auto; transform:none; }
+    .editor-bar button { border:1px solid var(--silver); background:var(--black); color:var(--white); padding:9px 12px; font:500 13px/1 Switzer,sans-serif; cursor:pointer; }
+    .editor-bar button[aria-pressed="true"] { background:var(--white); color:var(--black); }
+    .editing [data-edit-id] { outline:1px dashed var(--silver); outline-offset:6px; cursor:text; }
+    .editing [data-edit-id]:focus { outline:2px solid currentColor; }
+    @media print { html,body { width:1920px; height:auto; overflow:visible; background:var(--white); } .viewport { height:auto; overflow:visible; } .deck-stage { position:static; width:auto; height:auto; transform:none!important; } .slide { position:relative; display:block!important; visibility:visible!important; opacity:1!important; pointer-events:auto!important; transform:none!important; transition:none!important; width:1920px; height:1080px; break-after:page; page-break-after:always; } .slide:last-child { break-after:auto; page-break-after:auto; } .controls,.hint,.editor-bar { display:none!important; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition-duration:.01ms!important; animation-duration:.01ms!important; } .reveal { opacity:1; transform:none; } }
+  </style>
+</head>
+<body>
+  <div class="viewport"><main class="deck-stage" id="stage" aria-live="polite">
+    <section class="slide dark active" aria-label="封面页" data-page-type="cover">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-white.png" alt="观宇芯算 GUANYU">
+      <div class="cover-content"><div class="cover-orbit" aria-hidden="true"></div><div class="eyebrow reveal">GUANYU / SPACE COMPUTING</div><h1 class="cover-title reveal">构建星际算力<br>赋能深空网络</h1><p class="cover-meta reveal">SPACE COMPUTING INFRASTRUCTURE / 2026</p></div>
+      <div class="page-foot"><span>GUANYU / COVER</span><span>01 / 06</span></div>
+    </section>
+
+    <section class="slide dark" aria-label="章节分隔页" data-page-type="section">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-white.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>PRODUCT &amp; CHIP SOLUTION</span></div>
+      <div class="section-content"><div class="eyebrow reveal">03 / SECTION</div><div class="section-number reveal">03</div><h1 class="section-title reveal">产品与芯片方案</h1></div>
+      <div class="page-foot"><span>GUANYU / SECTION</span><span>02 / 06</span></div>
+    </section>
+
+    <section class="slide" aria-label="叙事页" data-page-type="narrative">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-black.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>NARRATIVE</span></div>
+      <div class="content"><div class="eyebrow reveal">01 / CAPABILITY</div><div class="grid"><h1 class="title narrative-title reveal">把复杂的计算<br>组织成清楚的能力。</h1><div class="narrative-copy reveal"><div class="rule"></div><p class="copy">观宇芯算以高效、可靠、可度量的算力基础设施，连接模型、数据与真实业务，让每一次计算都更接近确定的结果。</p></div></div></div>
+      <div class="page-foot"><span>GUANYU / NARRATIVE</span><span>03 / 06</span></div>
+    </section>
+
+    <section class="slide" aria-label="三栏能力页" data-page-type="columns">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-black.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>CAPABILITY</span></div>
+      <div class="content"><div class="eyebrow reveal">02 / SYSTEM</div><h1 class="title reveal">三层能力，连接一次计算。</h1><div class="grid columns"><article class="column reveal"><div class="column-no">01</div><h2>计算资源</h2><p>面向高性能计算场景，提供稳定的资源调度与运行环境。</p></article><article class="column reveal"><div class="column-no">02</div><h2>平台连接</h2><p>让模型、数据、工具与团队在同一套工作流中协同。</p></article><article class="column reveal"><div class="column-no">03</div><h2>结果验证</h2><p>用可追踪的指标和过程，建立从输入到结果的可信链路。</p></article></div></div>
+      <div class="page-foot"><span>GUANYU / COLUMNS</span><span>04 / 06</span></div>
+    </section>
+
+    <section class="slide dark" aria-label="流程页" data-page-type="process">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-white.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>PROCESS</span></div>
+      <div class="content"><div class="eyebrow reveal">03 / PROCESS</div><h1 class="title reveal">从任务入口到交付</h1><div class="grid steps"><article class="step reveal"><div class="step-no">01</div><h2>任务入口</h2><p>把时延、功耗与回传等约束纳入任务定义。</p></article><article class="step reveal"><div class="step-no">02</div><h2>在轨节点</h2><p>提供受限环境下的计算、存储与任务执行。</p></article><article class="step reveal"><div class="step-no">03</div><h2>地面协同</h2><p>完成编排、更新、监控与异常处置。</p></article><article class="step reveal"><div class="step-no">04</div><h2>数据交付</h2><p>按价值优先级输出高价值任务结果。</p></article></div></div>
+      <div class="page-foot"><span>GUANYU / PROCESS</span><span>05 / 06</span></div>
+    </section>
+
+    <section class="slide" aria-label="数据指标页" data-page-type="metrics">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-black.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>EVIDENCE</span></div>
+      <div class="content"><div class="eyebrow reveal">04 / EVIDENCE</div><h1 class="title reveal">用结果，优先把 KPI 讲清。</h1><div class="grid metrics"><article class="metric reveal"><div class="metric-value">XX</div><div class="metric-label">指标 A / 单位</div><div class="metric-source">来源：待填 / 日期：待填</div></article><article class="metric reveal"><div class="metric-value">XX</div><div class="metric-label">指标 B / 单位</div><div class="metric-source">来源：待填 / 日期：待填</div></article><article class="metric reveal"><div class="metric-value">XX</div><div class="metric-label">指标 C / 单位</div><div class="metric-source">来源：待填 / 日期：待填</div></article></div></div>
+      <div class="page-foot"><span>GUANYU / EVIDENCE</span><span>06 / 06</span></div>
+    </section>
+    <section class="slide" aria-label="图文叙事页" data-page-type="image-story">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-black.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>IMAGE / NARRATIVE</span></div>
+      <div class="content"><div class="eyebrow reveal">05 / IMAGE STORY</div><div class="grid"><div class="story-claim reveal"><h2>让真实场景<br>成为叙事的证据。</h2><p>使用经批准的产品、设备、场景或团队图片，配合一条可以被验证的核心说明。</p></div><div class="image-panel reveal" role="img" aria-label="真实图片占位区"><div><strong>真实图片 / 待替换</strong><span>图片来源、拍摄日期与授权状态待填</span></div></div></div></div>
+      <div class="page-foot"><span>GUANYU / IMAGE STORY</span><span>07 / 10</span></div>
+    </section>
+
+    <section class="slide dark" aria-label="系统架构页" data-page-type="architecture">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-white.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>ARCHITECTURE</span></div>
+      <div class="content"><div class="eyebrow reveal">06 / SYSTEM ARCHITECTURE</div><h1 class="title reveal">用关系，而非装饰<br>解释系统结构。</h1><div class="architecture reveal" aria-label="系统架构关系图"><svg viewBox="0 0 1776 510" aria-hidden="true"><line class="connector" x1="888" y1="255" x2="280" y2="88"/><line class="connector" x1="888" y1="255" x2="1496" y2="88"/><line class="connector" x1="888" y1="255" x2="280" y2="422"/><line class="connector" x1="888" y1="255" x2="1496" y2="422"/></svg><div class="node n1">输入 / 待定义</div><div class="node n2">资源 / 待定义</div><div class="node center">核心系统<br>待定义</div><div class="node n3">数据 / 待定义</div><div class="node n4">输出 / 待定义</div></div></div>
+      <div class="page-foot"><span>GUANYU / ARCHITECTURE</span><span>08 / 10</span></div>
+    </section>
+
+    <section class="slide" aria-label="对比表格页" data-page-type="comparison">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-black.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>COMPARISON</span></div>
+      <div class="content"><div class="eyebrow reveal">07 / COMPARISON</div><h1 class="title reveal">用同一组标准<br>比较不同方案。</h1><div class="comparison reveal" role="table" aria-label="方案比较模板"><div class="comparison-row head" role="row"><span>比较维度</span><span>方案 A</span><span>方案 B</span><span>方案 C</span></div><div class="comparison-row reveal" role="row"><span>核心指标 / 待定义</span><span class="latin">—</span><span class="latin">—</span><span class="latin">—</span></div><div class="comparison-row reveal" role="row"><span>适用场景 / 待定义</span><span class="latin">—</span><span class="latin">—</span><span class="latin">—</span></div><div class="comparison-row reveal" role="row"><span>实施条件 / 待定义</span><span class="latin">—</span><span class="latin">—</span><span class="latin">—</span></div><div class="comparison-row reveal" role="row"><span>结论 / 待验证</span><span class="latin">—</span><span class="latin">—</span><span class="latin">—</span></div></div></div>
+      <div class="page-foot"><span>来源 / 日期：待填</span><span>09 / 10</span></div>
+    </section>
+
+    <section class="slide" aria-label="时间线页面" data-page-type="roadmap">
+      <div class="frame"></div><img class="logo" src="assets/logo/guanyu-standard-black.png" alt="观宇芯算 GUANYU"><div class="page-head"><span>ROADMAP</span></div>
+      <div class="content"><div class="eyebrow reveal">08 / ROADMAP</div><h1 class="title reveal">让阶段与节点<br>沿同一条线展开。</h1><div class="timeline"><div class="timeline-line" aria-hidden="true"></div><div class="grid"><article class="milestone reveal"><div class="date">阶段 01 / 待填</div><h2>起点</h2><p>目标、范围与必要条件待定义。</p></article><article class="milestone reveal"><div class="date">阶段 02 / 待填</div><h2>验证</h2><p>关键结果与验证方式待定义。</p></article><article class="milestone reveal"><div class="date">阶段 03 / 待填</div><h2>推进</h2><p>交付事项与依赖关系待定义。</p></article><article class="milestone reveal"><div class="date">阶段 04 / 待填</div><h2>交付</h2><p>结论、日期与负责人待定义。</p></article></div></div></div>
+      <div class="page-foot"><span>GUANYU / ROADMAP</span><span>10 / 10</span></div>
+    </section>
+  </main></div>
+  <div class="hint">← → / swipe / wheel</div><div class="controls" id="counter">01 / 10</div><div class="editor-bar" aria-label="演示控制"><button id="editToggle" type="button" aria-pressed="false">编辑文本</button><button id="printDeck" type="button">打印 / PDF</button><button id="resetEdits" type="button">重置编辑</button></div>
+  <script>
+    const slides=[...document.querySelectorAll('.slide')], stage=document.querySelector('#stage'), counter=document.querySelector('#counter'), editToggle=document.querySelector('#editToggle'), printDeck=document.querySelector('#printDeck'), resetEdits=document.querySelector('#resetEdits');
+    const storageKey='guanyu-template-edits-v1';
+    let index=0, startX=0, editing=false, uiTimer=0;
+    const editables=[...document.querySelectorAll('.slide h1,.slide h2,.slide p,.slide .metric-label,.slide .metric-source,.slide .image-panel strong,.slide .image-panel span,.slide .comparison-row span,.slide .date')];
+    editables.forEach((el,n)=>{el.dataset.editId=`field-${n}`;el.setAttribute('contenteditable','false');});
+    function scale(){const factor=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform=`translate(-50%,-50%) scale(${factor})`;}
+    function revealUI(){document.body.classList.add('show-ui');clearTimeout(uiTimer);if(!editing)uiTimer=setTimeout(()=>document.body.classList.remove('show-ui'),1800);}
+    function saveEdits(){const data={};editables.forEach(el=>data[el.dataset.editId]=el.innerHTML);localStorage.setItem(storageKey,JSON.stringify(data));}
+    function restoreEdits(){try{const data=JSON.parse(localStorage.getItem(storageKey)||'{}');editables.forEach(el=>{if(data[el.dataset.editId]!==undefined)el.innerHTML=data[el.dataset.editId];});}catch{}}
+    function setEditing(on){editing=on;document.body.classList.toggle('editing',on);editToggle.setAttribute('aria-pressed',String(on));editToggle.textContent=on?'完成编辑':'编辑文本';editables.forEach(el=>el.setAttribute('contenteditable',String(on)));if(on){document.body.classList.add('show-ui');clearTimeout(uiTimer);const first=editables.find(el=>el.closest('.slide')?.classList.contains('active'));if(first)first.focus();}else{saveEdits();revealUI();}}
+    function show(next){index=(next+slides.length)%slides.length;slides.forEach((slide,i)=>{const current=i===index;slide.classList.toggle('active',current);slide.classList.toggle('visible',current);if(current)slide.dataset.visited='true';slide.querySelector('.page-foot span:last-child').textContent=`${String(i+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;});counter.textContent=`${String(index+1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;history.replaceState(null,'',`#${index+1}`);}
+    function move(delta){show(index+delta);}
+    addEventListener('resize',scale);
+    addEventListener('pointermove',revealUI);
+    addEventListener('keydown',e=>{revealUI();if(editing&&document.activeElement?.isContentEditable){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveEdits();}if(e.key==='Escape')setEditing(false);return;}if(e.key.toLowerCase()==='e')setEditing(!editing);if(e.key.toLowerCase()==='p')window.print();if(['ArrowRight','PageDown',' '].includes(e.key))move(1);if(['ArrowLeft','PageUp'].includes(e.key))move(-1);});
+    stage.addEventListener('click',e=>{if(editing||e.target.isContentEditable)return;move(e.clientX<innerWidth/2?-1:1);});
+    stage.addEventListener('wheel',e=>{e.preventDefault();if(Math.abs(e.deltaY)>20)move(e.deltaY>0?1:-1);},{passive:false});
+    stage.addEventListener('touchstart',e=>startX=e.touches[0].clientX);
+    stage.addEventListener('touchend',e=>{if(editing)return;const delta=e.changedTouches[0].clientX-startX;if(Math.abs(delta)>40)move(delta<0?1:-1);});
+    editToggle.addEventListener('click',()=>setEditing(!editing));
+    printDeck.addEventListener('click',()=>window.print());
+    resetEdits.addEventListener('click',()=>{if(confirm('重置当前浏览器保存的模板文字编辑？')){localStorage.removeItem(storageKey);location.reload();}});
+    document.addEventListener('input',e=>{if(editing&&e.target.dataset?.editId)saveEdits();});
+    addEventListener('hashchange',()=>{const requested=Number(location.hash.slice(1)||1)-1;if(requested!==index)show(requested);});
+    restoreEdits();scale();show(Number(location.hash.slice(1)||1)-1);
+  </script>
+</body></html>

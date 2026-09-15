@@ -1,0 +1,4 @@
+interface:
+  display_name: "GUANYU HTML Builder"
+  short_description: "按观宇芯算 VI 规范制作 HTML 演示页、品牌网页和 PPT/Word 转 HTML 展示页。"
+  default_prompt: "使用 $guanyu-html-builder，基于观宇芯算 VI 手册和新版 PPT 校准参考，制作一个可运行、可编辑、可 QA、可导出的 HTML 演示页。"
