@@ -29,7 +29,7 @@
 将仓库克隆到你本机的 Codex Skills 目录，并保持根目录中的 `SKILL.md` 文件不变：
 
 ```powershell
-git clone https://github.com/Aneline-lin/GUANYU-html-skill.git <你的-Codex-Skills-目录>/guanyu-html-builder
+git clone https://github.com/Angeline-LLin/GUANYU-html-skill.git <你的-Codex-Skills-目录>/guanyu-html-builder
 ```
 
 重新打开 Codex 后，即可直接描述需求，例如：
