@@ -35,7 +35,10 @@ When a page-level example conflicts with the brand manual, follow the brand manu
 
 ## Logo
 
-- Use the approved black or white transparent PNG in `assets/logo/`.
+- This public repository intentionally does not include GUANYU logo PNG files.
+- Authorized internal users must obtain the approved black and white transparent PNG files from the company's internal brand source and place them in `assets/logo/` before using this skill.
+- Required file names: `guanyu-standard-black.png` and `guanyu-standard-white.png`.
+- If either required PNG is missing, stop and ask the user to provide the approved internal files. Do not substitute text, SVG, CSS, public web downloads, screenshots, or recreated artwork.
 - Prefer the Chinese-English combination Logo.
 - Use black on light backgrounds and white on dark or image backgrounds.
 - Use one Logo instance on ordinary cover and content pages.

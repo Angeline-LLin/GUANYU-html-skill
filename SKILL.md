@@ -16,6 +16,17 @@ Follow this authority order without exception:
 
 Do not use Frontend Slides' original visual presets, bold template pack, external template libraries, unapproved fonts, arbitrary colors, or generic AI aesthetics. If a request conflicts with the two GUANYU references, flag the conflict and follow the higher-priority brand rule.
 
+## Required private logo assets
+
+This public skill repository intentionally does not include GUANYU logo PNG files.
+
+Before creating, converting, previewing, QA-ing, or packaging any GUANYU-branded output, verify that the authorized user has placed the approved internal logo files in `assets/logo/` with these exact names:
+
+- `guanyu-standard-black.png`
+- `guanyu-standard-white.png`
+
+If either file is missing, stop and ask the user to obtain the approved PNG files from the company's internal brand source and place them in `assets/logo/`. Do not generate a branded deck or substitute the Logo with text, SVG, CSS, screenshots, public web downloads, or recreated artwork.
+
 ## Modes
 
 Choose one mode before generating:
@@ -103,16 +114,17 @@ Never infer visual quality from page count alone. After rendering, inspect every
 ## Workflow
 
 1. Establish audience, purpose, source materials, language, page count, and delivery status. Separate verified facts from design references. Never invent metrics, customers, products, quotes, or claims.
-2. Read the relevant brand rules. Read the PPT layout reference when the task is a presentation, PPT conversion, or when the user asks to match the calibrated deck.
-3. Build `slides-plan.json` before writing HTML. Give each page one narrative job and one primary claim. Select a GUANYU page family and page type; do not silently invent a new brand pattern.
-4. For a new presentation, generate three visual previews within the same GUANYU system: standard brand, technology/data, and narrative/communication. These are layout strategies, not different brands. Record them in `preview-directions.json`, then let the user choose one or a deliberate mix before the full deck.
-5. If images exist, create `image-audit.json` before finalizing the outline. Use approved factual images in the plan; rebuild off-brand diagrams and watermarked specification boards as native HTML/SVG when possible.
-6. Implement the chosen direction with semantic HTML, CSS custom properties, local approved fonts, approved Logo assets, and plain JavaScript. Prefer a self-contained HTML file for presentations unless multiple files materially improve maintainability.
-7. Start from `assets/templates/guanyu-deck-runtime.html` for new fixed-stage presentation decks unless a custom architecture is necessary. Implement the runtime from `references/guanyu-runtime-and-export.md`: edit mode, local save, edited HTML export, overview mode, print/PDF mode, keyboard/click/wheel/touch/hash navigation, and reduced-motion support. Presenter mode is optional.
-8. Use the calibrated 12-column grid, 1280x720 coordinate system, common header/footer, and page-type capacity from the references. Keep content within the approved geometry.
-9. Handle overflow in this order: shorten copy, restructure, split the page, change page type. For image-text pages, first decide whether the image is decorative, contextual, or evidence. If it is evidence, rebalance the layout before cropping: reduce text measure, introduce intentional title breaks, move the image to a fixed grid-aligned region, and use `object-fit: contain` when the full object must be visible. Never solve overflow by silently shrinking below the minimum type sizes.
-10. Run `scripts/qa_html_deck.js` on the HTML deck. Inspect the generated screenshots and `qa-report.html`, not just the JSON. Reject any page with overflow, overlap, clipping, Logo misuse, broken images, unapproved colors, broken navigation, broken print/export/runtime mode, missing reduced-motion support, or text/encoding symptoms.
-11. Run the GUANYU quality checklist before delivery. For external handoff, run `scripts/package_deck.py` so the HTML, fonts, Logos, images, and selected planning artifacts travel together. Report the files, chosen page types, assumptions, sources, QA result, package path, and any provisional/planned status or font substitution.
+2. Verify the required private Logo PNG files exist in `assets/logo/`. If they are missing, stop and ask the user to provide the approved internal files before continuing.
+3. Read the relevant brand rules. Read the PPT layout reference when the task is a presentation, PPT conversion, or when the user asks to match the calibrated deck.
+4. Build `slides-plan.json` before writing HTML. Give each page one narrative job and one primary claim. Select a GUANYU page family and page type; do not silently invent a new brand pattern.
+5. For a new presentation, generate three visual previews within the same GUANYU system: standard brand, technology/data, and narrative/communication. These are layout strategies, not different brands. Record them in `preview-directions.json`, then let the user choose one or a deliberate mix before the full deck.
+6. If images exist, create `image-audit.json` before finalizing the outline. Use approved factual images in the plan; rebuild off-brand diagrams and watermarked specification boards as native HTML/SVG when possible.
+7. Implement the chosen direction with semantic HTML, CSS custom properties, local approved fonts, approved Logo assets, and plain JavaScript. Prefer a self-contained HTML file for presentations unless multiple files materially improve maintainability.
+8. Start from `assets/templates/guanyu-deck-runtime.html` for new fixed-stage presentation decks unless a custom architecture is necessary. Implement the runtime from `references/guanyu-runtime-and-export.md`: edit mode, local save, edited HTML export, overview mode, print/PDF mode, keyboard/click/wheel/touch/hash navigation, and reduced-motion support. Presenter mode is optional.
+9. Use the calibrated 12-column grid, 1280x720 coordinate system, common header/footer, and page-type capacity from the references. Keep content within the approved geometry.
+10. Handle overflow in this order: shorten copy, restructure, split the page, change page type. For image-text pages, first decide whether the image is decorative, contextual, or evidence. If it is evidence, rebalance the layout before cropping: reduce text measure, introduce intentional title breaks, move the image to a fixed grid-aligned region, and use `object-fit: contain` when the full object must be visible. Never solve overflow by silently shrinking below the minimum type sizes.
+11. Run `scripts/qa_html_deck.js` on the HTML deck. Inspect the generated screenshots and `qa-report.html`, not just the JSON. Reject any page with overflow, overlap, clipping, Logo misuse, broken images, unapproved colors, broken navigation, broken print/export/runtime mode, missing reduced-motion support, or text/encoding symptoms.
+12. Run the GUANYU quality checklist before delivery. For external handoff, run `scripts/package_deck.py` so the HTML, fonts, Logos, images, and selected planning artifacts travel together. Report the files, chosen page types, assumptions, sources, QA result, package path, and any provisional/planned status or font substitution.
 
 ## QA and packaging scripts
 
@@ -143,6 +155,7 @@ For the next reconstruction stage, use `scripts/extract_ppt_shapes.py` to invent
 ## Mandatory implementation rules
 
 - Use local `MiSans` for Chinese and `Switzer` for Latin letters, numbers, symbols, and Latin punctuation. Use the approved files in `assets/fonts/`.
+- Require the approved internal Logo PNG files in `assets/logo/` before any branded output is generated. Missing Logo files are a blocking condition, not a reason to recreate or download substitutes.
 - Use only `Space Black #000000`, `Essential White #FFFFFF`, and `Matrix Silver #8C8C8C` for the UI system unless the brand reference explicitly allows otherwise. Natural image colors may remain inside images but must not become system accent colors.
 - Never introduce blue, cyan, orange, rainbow chart palettes, large gradients, neon cyberpunk styling, or decorative slanted separators.
 - Use one approved Logo instance per ordinary page unless the page type explicitly permits omission. Never redraw, distort, rotate, recolor, shadow, blur, or recombine the Logo.

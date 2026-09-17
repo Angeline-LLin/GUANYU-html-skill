@@ -32,6 +32,23 @@
 git clone https://github.com/Angeline-LLin/GUANYU-html-skill.git <你的-Codex-Skills-目录>/guanyu-html-builder
 ```
 
+## 内部 Logo 文件
+
+公开仓库不包含 GUANYU Logo PNG 文件。企业内部用户在使用本 Skill 前，需要先从公司内部品牌资料库取得批准版本，并放到：
+
+```text
+assets/logo/
+```
+
+必须使用以下文件名：
+
+```text
+guanyu-standard-black.png
+guanyu-standard-white.png
+```
+
+如果缺少任意一个 Logo 文件，Skill 应停止生成品牌演示或网页，不应使用文字、SVG、CSS、截图、公开网络下载或重绘图形替代 Logo。
+
 重新打开 Codex 后，即可直接描述需求，例如：
 
 ```text

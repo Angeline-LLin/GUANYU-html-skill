@@ -35,6 +35,12 @@ DIRECTIONS = [
 ]
 
 
+REQUIRED_LOGOS = (
+    Path(__file__).resolve().parents[1] / "assets" / "logo" / "guanyu-standard-black.png",
+    Path(__file__).resolve().parents[1] / "assets" / "logo" / "guanyu-standard-white.png",
+)
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Create three GUANYU-only first-slide visual previews.")
     parser.add_argument("--out-dir", required=True, help="Directory for preview HTML files.")
@@ -103,6 +109,13 @@ def render_preview(direction, title, subtitle):
 
 def main():
     args = parse_args()
+    missing_logos = [str(path) for path in REQUIRED_LOGOS if not path.is_file()]
+    if missing_logos:
+        raise SystemExit(
+            "Missing required internal GUANYU logo PNG files. "
+            "Place guanyu-standard-black.png and guanyu-standard-white.png in assets/logo/ before generating previews. "
+            f"Missing: {', '.join(missing_logos)}"
+        )
     out_dir = Path(args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     records = []
